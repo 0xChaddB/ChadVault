@@ -1,66 +1,50 @@
-## Foundry
 
-**Foundry is a blazing fast, portable and modular toolkit for Ethereum application development written in Rust.**
+# ChadVault
 
-Foundry consists of:
+ChadVault is a **DeFi yield farming platform** designed to maximize user returns through sustainable and transparent mechanisms. Built on the **ERC-4626 Vault Standard**, ChadVault ensures efficiency, compatibility, and ease of use for staking and earning real yield as a learning and showcase tool.
 
--   **Forge**: Ethereum testing framework (like Truffle, Hardhat and DappTools).
--   **Cast**: Swiss army knife for interacting with EVM smart contracts, sending transactions and getting chain data.
--   **Anvil**: Local Ethereum node, akin to Ganache, Hardhat Network.
--   **Chisel**: Fast, utilitarian, and verbose solidity REPL.
+---
 
-## Documentation
+## Roadmap
 
-https://book.getfoundry.sh/
+### What’s Done
+- **ERC-4626 Vault**: Implements the standard for tokenized yield-bearing assets.
+- **Real Yield Model**: Uses sustainable farming strategies for actual returns.
+- **Basic Staking and Withdrawal**: Deposit and withdraw tokens with ease.
 
-## Usage
+### What’s Next
+- **Auto-Compounding**: Automatically reinvest rewards for better growth.
+- **Multi-Strategy Support**: Add more farming strategies to choose from.
+- **Analytics Dashboard**: Simple stats like APY and earned yield.
 
-### Build
+---
 
-```shell
-$ forge build
-```
+## Getting Started
 
-### Test
+### Prerequisites
+To use ChadVault, you’ll need:
+- A Web3 wallet (e.g., **MetaMask**).
+- **ETH** for staking and gas fees.
 
-```shell
-$ forge test
-```
+### Installation
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/yourusername/chadvault.git
+   ```
+2. Navigate to the project directory:
+   ```bash
+   cd chadvault
+   ```
+3. Install dependencies:
+   ```bash
+   yarn install
+   ```
+4. Build and test the smart contracts:
+   ```bash
+   forge build
+   forge test
+   ```
 
-### Format
+---
 
-```shell
-$ forge fmt
-```
-
-### Gas Snapshots
-
-```shell
-$ forge snapshot
-```
-
-### Anvil
-
-```shell
-$ anvil
-```
-
-### Deploy
-
-```shell
-$ forge script script/Counter.s.sol:CounterScript --rpc-url <your_rpc_url> --private-key <your_private_key>
-```
-
-### Cast
-
-```shell
-$ cast <subcommand>
-```
-
-### Help
-
-```shell
-$ forge --help
-$ anvil --help
-$ cast --help
-```
+🚀 **Happy farming with ChadVault!** 🌱
