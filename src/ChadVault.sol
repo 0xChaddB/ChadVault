@@ -9,7 +9,4 @@ contract ChadVault is ERC4626 {
 
     constructor(IERC20 _asset) ERC4626(_asset)  ERC20("ChadToken", "CTN"){} // Underlying asset (MockDAI)
 
-    function deposit(uint256 assets, address receiver) public override returns (uint256) {
-        return super.deposit(assets, receiver);
-    }
 }       
