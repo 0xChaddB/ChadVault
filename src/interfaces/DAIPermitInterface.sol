@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.28;
 
-interface IDaiPermit {
+interface DAIPermitInterface {
     function permit(
         address holder,
         address spender,
