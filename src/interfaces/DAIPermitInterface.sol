@@ -13,7 +13,5 @@ interface IDaiPermit {
         bytes32 s
     ) external;
 
-    function nonces(address holder) external view returns (uint256);
-
-    function DOMAIN_SEPARATOR() external view returns (bytes32);
+    function nonces(address owner) external view returns (uint256);
 }
