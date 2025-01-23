@@ -10,14 +10,10 @@ contract MockDAI is ERC20, IERC20Permit {
     mapping(address => uint256) private _nonces;
     bytes32 private immutable _DOMAIN_SEPARATOR;
 
-    // Event for logging the calculated digest
     event LogDigest(bytes32 digest);
-    // Event for logging the recovered signer
     event LogSigner(address signer);
-    // Event for logging the expected owner (signer)
     event LogExpectedSigner(address expectedSigner);
-    // Event for logging the DOMAIN_SEPARATOR
-    event LogDomainSeparator(bytes32 domainSeparator);
+    event LogNonce(address owner, uint256 nonce);
 
 
     constructor() ERC20("Mock DAI", "mDAI") {
@@ -54,17 +50,22 @@ contract MockDAI is ERC20, IERC20Permit {
                 owner,
                 spender,
                 value,
-                _nonces[owner]++,
+                _nonces[owner],
                 deadline
             )
         );
 
         bytes32 digest = keccak256(abi.encodePacked("\x19\x01", _DOMAIN_SEPARATOR, structHash));
         address signer = ecrecover(digest, v, r, s);
+
+        // Add logs for debugging
         emit LogDigest(digest);
         emit LogSigner(signer);
+        emit LogExpectedSigner(owner);
+        emit LogNonce(owner, _nonces[owner]);
 
-        require(signer == owner, "Invalid signature");
+        require(signer != address(0) && signer == owner, "Invalid signature");
+        _nonces[owner]++;
         _approve(owner, spender, value);
     }
 
