@@ -82,19 +82,19 @@ The development process is structured step-by-step to ensure a comprehensive und
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/0xMushow/vault-system.git
+   git clone https://github.com/0xChaddB/ChadVault
    ```
 2. Install dependencies:
    ```bash
-   npm install
+   forge install
    ```
 3. Compile contracts:
    ```bash
-   npx hardhat compile
+   forge build
    ```
 4. Run tests:
    ```bash
-   npx hardhat test
+   forge test
    ```
 
 ---
