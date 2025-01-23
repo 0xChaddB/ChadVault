@@ -11,13 +11,13 @@ import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol
 // Does the permit disable attacks? Should implement a whitelist for trusted tokens ?
 // What about Tokens contract permits function? What are their different usage and restrictions/safety recommendations? 
 contract ChadVault is ERC4626, ReentrancyGuard {
+    address public daiYieldManager;
 
-    constructor(IERC20 _asset)   
-        ERC20("vChadDAI", "VCD") 
-        ERC4626(_asset) 
-    {
-        require(address(_asset) != address(0), "Invalid asset address");
+    constructor(IERC20 _asset, address _daiYieldManager) ERC20("vChadDAI", "VCD") ERC4626(_asset) {
+        require(_daiYieldManager != address(0), "Invalid YieldManager address");
+        daiYieldManager = _daiYieldManager;
     }
+
 
     /**
      * @dev Deposit with permit to save an extra transaction.
