@@ -9,7 +9,7 @@ import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol
 
 // ChadVault implemented ReentrancyGuard, but what about cross-contract Reentracys?
 // Does the permit disable attacks? Should implement a whitelist for trusted tokens ?
-// What about Tokens contract permits function? What are their different usage and restrictions? 
+// What about Tokens contract permits function? What are their different usage and restrictions/safety recommendations? 
 contract ChadVault is ERC4626, ReentrancyGuard {
 
     constructor(IERC20 _asset)   
