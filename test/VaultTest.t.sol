@@ -6,9 +6,10 @@ import {Test} from "forge-std/Test.sol";
 import {MockDAI} from "../src/mock/MockDAI.sol";
 
 contract VaultTest is Test {
-    event LogDigest(bytes32 digest);
     event LogSigner(address signer);
     event LogDomainSeparator(bytes32 domainSeparator);
+    event LogNonceFromTest(uint256 nonce);
+    event LogDigestFromTest(bytes32 digest);
 
     ChadVault vault;
     MockDAI dai;
@@ -60,7 +61,7 @@ contract VaultTest is Test {
         );
 
         // Log the digest and DOMAIN_SEPARATOR for debugging
-        emit LogDigest(digest);
+        emit LogDigestFromTest(digest);
         emit LogDomainSeparator(dai.DOMAIN_SEPARATOR());
 
         uint256 USER1_PRIVATE_KEY = uint256(keccak256("USER1"));
@@ -77,4 +78,74 @@ contract VaultTest is Test {
 
         vm.stopPrank();
     }
+
+    function testWithdrawWithPermit() public {
+        uint256 withdrawAmount = 1e18;
+        uint256 deadline = block.timestamp + 1 hours;
+
+        vm.startPrank(USER1);
+
+        // Deposit assets
+        dai.approve(address(vault), depositAmount);
+        vault.deposit(depositAmount, USER1);
+
+        vm.stopPrank();
+
+        // Check DOMAIN_SEPARATOR
+        bytes32 expectedDomainSeparator = keccak256(
+            abi.encode(
+                keccak256("EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"),
+                keccak256(bytes(dai.name())),
+                keccak256(bytes("1")),
+                block.chainid,
+                address(dai)
+            )
+        );
+        assertEq(dai.DOMAIN_SEPARATOR(), expectedDomainSeparator, "DOMAIN_SEPARATOR mismatch");
+
+        uint256 nonce = dai.nonces(USER1);
+
+        // Compute digest
+        bytes32 digest = keccak256(
+            abi.encodePacked(
+                "\x19\x01",
+                dai.DOMAIN_SEPARATOR(),
+                keccak256(
+                    abi.encode(
+                        keccak256("Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)"),
+                        USER1,
+                        address(vault),
+                        withdrawAmount,
+                        nonce,
+                        deadline
+                    )
+                )
+            )
+        );
+
+        // Sign the digest
+        uint256 USER1_PRIVATE_KEY = uint256(keccak256("USER1"));
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(USER1_PRIVATE_KEY, digest);
+
+        vm.startPrank(USER1);
+
+        // Withdraw with permit
+        vault.withdrawWithPermit(withdrawAmount, USER1, USER1, deadline, v, r, s);
+
+        // Assertions
+        assertEq(vault.totalAssets(), 0, "Vault assets mismatch after withdraw");
+        assertEq(vault.balanceOf(USER1), 0, "User shares mismatch after withdraw");
+        // USER1's final DAI balance should match the initial balance (10e18)
+        assertEq(
+            dai.balanceOf(USER1),
+            STARTING_BALANCE,
+            "DAI balance mismatch after withdraw"
+        );
+
+        vm.stopPrank();
+    }
+
+
+
+
 }
