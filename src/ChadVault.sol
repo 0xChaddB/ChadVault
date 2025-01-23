@@ -43,4 +43,37 @@ contract ChadVault is ERC4626 {
         // Deposit the tokens after approval
         deposit(amount, receiver);
     }
+
+    /**
+     * @dev Withdraw with permit to save an extra transaction.
+     * @param shares The amount of Vault shares to redeem.
+     * @param receiver The address to receive the withdrawn assets.
+     * @param owner The address that owns the shares to be redeemed.
+     * @param deadline The deadline for the signature to be valid.
+     * @param v, r, s The components of the signature for the permit.
+    */
+    function withdrawWithPermit(
+        uint256 shares,
+        address receiver,
+        address owner,
+        uint256 deadline,
+        uint8 v,
+        bytes32 r,
+        bytes32 s
+    ) external {
+        // Call permit on the underlying token (MockDAI)
+        IERC20Permit(address(asset())).permit(
+            owner,
+            address(this),
+            shares,
+            deadline,
+            v,
+            r,
+            s
+        );
+
+        // Proceed with the withdraw process
+        withdraw(shares, receiver, owner);
+    }
+    
 }
