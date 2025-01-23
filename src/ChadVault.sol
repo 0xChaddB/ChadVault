@@ -1,11 +1,14 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.28;
 
+
+import {MockDAI} from "./mock/MockDAI.sol";
 import {ERC4626, IERC20, ERC20} from "@openzeppelin/contracts/token/ERC20/extensions/ERC4626.sol";
 import {IERC20Permit} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Permit.sol";
-import {MockDAI} from "./mock/MockDAI.sol";
+import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
-contract ChadVault is ERC4626 {
+// ChadVault implemented ReentrancyGuard, but what about cross-contract Reentracys?
+contract ChadVault is ERC4626, ReentrancyGuard {
 
     constructor(IERC20 _asset)   
         ERC20("vChadDAI", "VCD") 
@@ -28,7 +31,7 @@ contract ChadVault is ERC4626 {
         uint8 v,
         bytes32 r,
         bytes32 s
-    ) external {
+    ) external nonReentrant() {
         // Use permit to approve the Vault
         MockDAI(address(asset())).permit(
             msg.sender,
@@ -60,7 +63,7 @@ contract ChadVault is ERC4626 {
         uint8 v,
         bytes32 r,
         bytes32 s
-    ) external {
+    ) external nonReentrant {
         // Call permit on the underlying token (MockDAI)
         IERC20Permit(address(asset())).permit(
             owner,
