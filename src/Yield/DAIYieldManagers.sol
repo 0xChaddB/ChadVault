@@ -15,11 +15,18 @@ contract DAIYieldManager is IYieldManager {
     address public immutable dai;
     IPool public immutable aavePool;
 
-    uint256 private totalInvestedAssets;
+    uint256 private totalInvestedDai;
 
     // Events
     event LogInvested(address indexed vault, uint256 amount);
     event LogWithdrawn(address indexed vault, uint256 amount);
+
+    // Errors
+
+    error InsufficientBalance(uint256 requested, uint256 available);
+    error ApprovalFailed();
+    error InvalidAmount();
+    error AaveInteractionFailed();
 
     // Constructor
     constructor(address _vault, address _dai, address _aaveProvider) {
@@ -44,43 +51,61 @@ contract DAIYieldManager is IYieldManager {
         _;
     }
 
-    modifier validateAmount(uint256 amount) {
-        require(amount > 0, "Amount must be greater than zero");
-        _;
-    }
-
     // Invest DAI into Aave
-    function invest(uint256 amount) external onlyVault validateAmount(amount) {
-        // Transfer DAI from the Vault to this contract
-        IERC20(dai).safeTransferFrom(vault, address(this), amount);
+    function invest(uint256 amount) external onlyVault {
+        if (amount == 0) {
+            revert InvalidAmount();
+        }
 
-        // Supply the tokens to Aave
-        aavePool.supply(dai, amount, address(this), 0);
+        uint256 vaultBalance = IERC20(dai).balanceOf(vault);
+        if (amount > vaultBalance) {
+            revert InsufficientBalance({requested: amount, available: vaultBalance});
+        }
 
-        // Update total invested assets
-        totalInvestedAssets += amount;
+        uint256 allowance = IERC20(dai).allowance(address(this), address(aavePool));
+        if (allowance < amount) {
+            if (!IERC20(dai).approve(address(aavePool), type(uint256).max)) {
+                revert ApprovalFailed();
+            }
+            emit LogAllowanceUpdated(address(aavePool), type(uint256).max);
+        }
 
+        // Assuming the external protocol will not fail if preconditions are met
+        bool success = _supplyToAave(amount);
+        if (!success) {
+            revert AaveInteractionFailed();
+        }
+
+        totalInvestedDai += amount;
         emit LogInvested(vault, amount);
     }
 
+    function _supplyToAave(uint256 amount) internal returns (bool) {
+        // External call to Aave
+        aavePool.supply(dai, amount, address(this), 0);
+        return true; // If it reverts, the whole transaction reverts
+    }
+
+
     // Withdraw DAI from Aave
     function withdraw(uint256 amount) external onlyVault validateAmount(amount) {
+        require (amount <= totalInvestedDai, "Not enough invested DAI");
         // Withdraw the tokens from Aave
         uint256 withdrawnAmount = aavePool.withdraw(dai, amount, vault);
 
         // Update total invested assets
-        totalInvestedAssets -= withdrawnAmount;
+        totalInvestedDai -= withdrawnAmount;
 
-        emit LogWithdrawn(vault, withdrawnAmount);
+        emit LogWithdrawn(vault, withdrawnAmount);  
     }
 
     // Returns the total DAI currently managed by the YieldManager
     function totalInvested() external view override returns (uint256) {
-        return totalInvestedAssets;
+        return totalInvestedDai;
     }
 
-    // Returns the total assets (both idle and invested)
+    // Returns the total assets (sum of idle and invested)
     function totalAssets() external view returns (uint256) {
-        return IERC20(dai).balanceOf(address(this)) + totalInvestedAssets;
+        return IERC20(dai).balanceOf(address(this)) + totalInvestedDai;
     }
 }
