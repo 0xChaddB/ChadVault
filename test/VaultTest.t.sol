@@ -4,6 +4,7 @@ pragma solidity ^0.8.28;
 import {ChadVault} from "../src/ChadVault.sol";
 import {Test} from "forge-std/Test.sol";
 import {MockDAI} from "../src/mock/MockDAI.sol";
+import {DAIYieldManager} from "../src/Yield/DAIYieldManager.sol";
 
 contract VaultTest is Test {
     event LogSigner(address signer);
@@ -13,6 +14,7 @@ contract VaultTest is Test {
 
     ChadVault vault;
     MockDAI dai;
+    DAIYieldManager yielder;
 
     address USER1 = makeAddr("USER1");
 
@@ -20,8 +22,9 @@ contract VaultTest is Test {
     uint256 depositAmount = 1e18;   
 
     function setUp() public {
+        //yielder = new DAIYieldManager();
         dai = new MockDAI();
-        vault = new ChadVault(dai);
+        vault = new ChadVault(dai, address(yielder));
         dai.mint(USER1, STARTING_BALANCE);
     }
 
