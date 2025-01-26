@@ -19,7 +19,7 @@ contract ChadVault is ERC4626, ReentrancyGuard {
         daiYieldManager = _daiYieldManager;
 
         // Approve YieldManager to use Vault funds
-        asset.approve(daiYieldManager, type(uint256).max);
+        IERC20(_asset).approve(daiYieldManager, type(uint256).max);
     }
 
     /**
