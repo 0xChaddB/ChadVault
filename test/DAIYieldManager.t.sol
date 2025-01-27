@@ -98,14 +98,14 @@ contract DAIYieldManagerTest is Test, TestUtils {
 
     function testUnauthorizedInvest() public {
         vm.startPrank(user1);
-        vm.expectRevert("Unauthorized");
+        vm.expectRevert("Caller is not the Vault");
         yieldManager.invest(100e18);
         vm.stopPrank();
     }
 
     function testUnauthorizedWithdraw() public {
         vm.startPrank(user1);
-        vm.expectRevert("Unauthorized");
+        vm.expectRevert("Caller is not the Vault");
         yieldManager.withdraw(100e18);
         vm.stopPrank();
     }
