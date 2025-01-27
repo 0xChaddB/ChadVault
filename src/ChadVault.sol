@@ -71,7 +71,7 @@ contract ChadVault is ERC4626, ReentrancyGuard {
         uint8 v,
         bytes32 r,
         bytes32 s
-    ) external nonReentrant() {
+    ) external {
         // Use permit to approve the Vault
         MockDAI(address(asset())).permit(
             msg.sender,
@@ -103,9 +103,9 @@ contract ChadVault is ERC4626, ReentrancyGuard {
         uint8 v,
         bytes32 r,
         bytes32 s
-    ) external nonReentrant {
+    ) external  {
         // Call permit on the underlying token (MockDAI)
-        IERC20Permit(address(asset())).permit(
+        MockDAI(address(asset())).permit(
             owner,
             address(this),
             shares,
