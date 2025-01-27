@@ -7,9 +7,11 @@ import {IPool} from "@aave/contracts/interfaces/IPool.sol";
 import {IYieldManager} from "../IYieldManager.sol";
 
 
-// @Dev Need to implement Yield managing...
-contract DAIYieldManager is IYieldManager {
+// @Dev Need to implement Yield managing, how will it work with multi protocol - multi tokens??
+// doing some clear and simple (with gas efficiency)...
 
+contract DAIYieldManager is IYieldManager {
+    
     // State variables
     address public immutable vault;
     address public immutable dai;
@@ -17,6 +19,7 @@ contract DAIYieldManager is IYieldManager {
 
     uint256 private totalInvestedDai;
 
+    // @Dev Interface maybe ??
     // Events
     event LogInvested(address indexed vault, uint256 amount);
     event LogWithdrawn(address indexed vault, uint256 amount);
@@ -43,8 +46,6 @@ contract DAIYieldManager is IYieldManager {
         // Initialize Aave pool
         IPoolAddressesProvider provider = IPoolAddressesProvider(_aaveProvider);
         aavePool = IPool(provider.getPool());
-            //@dev useless ??
-        // IERC20(dai).approve(address(aavePool), type(uint256).max);
     }
 
     // Modifiers
@@ -65,7 +66,8 @@ contract DAIYieldManager is IYieldManager {
         }
 
         uint256 allowance = IERC20(dai).allowance(address(vault), address(aavePool));
-        //@Dev Following if statement may be useless ?
+        //@Dev Completely useless ?
+        // 
         if (allowance < amount) {
             if (!IERC20(dai).approve(address(aavePool), type(uint256).max)) {
                 revert ApprovalFailed();

@@ -28,6 +28,7 @@ contract VaultTest is Test, TestUtils {
     function setUp() public {
         // Deploy MockDAI and mint tokens for USER1
         dai = new MockDAI();
+        //@Dev what about vm.deal here??
         dai.mint(USER1, STARTING_BALANCE);
 
         // Deploy MockPool
