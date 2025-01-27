@@ -5,31 +5,51 @@ import {ChadVault} from "../src/ChadVault.sol";
 import {Test} from "forge-std/Test.sol";
 import {MockDAI} from "../src/mock/MockDAI.sol";
 import {DAIYieldManager} from "../src/Yield/DAIYieldManager.sol";
+import {MockPool} from "../src/mock/MockAavePool.sol";
+import {TestUtils} from "./TestUtils.sol";
 
-contract VaultTest is Test {
+// Need more test, full integration tests...
+contract VaultTest is Test, TestUtils {
     event LogSigner(address signer);
     event LogDomainSeparator(bytes32 domainSeparator);
     event LogNonceFromTest(uint256 nonce);
     event LogDigestFromTest(bytes32 digest);
 
-    ChadVault vault;
-    MockDAI dai;
-    DAIYieldManager yielder;
+    ChadVault public vault;
+    MockDAI public dai;
+    DAIYieldManager public yielder;
+    MockPool public mockPool;
 
-    address USER1 = makeAddr("USER1");
+    address public USER1 = makeAddr("USER1");
 
     uint256 constant STARTING_BALANCE = 10e18; // 10 DAI
-    uint256 depositAmount = 1e18;   
+    uint256 depositAmount = 1e18;
 
     function setUp() public {
-        //yielder = new DAIYieldManager();
+        // Deploy MockDAI and mint tokens for USER1
         dai = new MockDAI();
-        vault = new ChadVault(dai, address(yielder));
         dai.mint(USER1, STARTING_BALANCE);
+
+        // Deploy MockPool
+        mockPool = new MockPool();
+
+        // Predict the address of DAIYieldManager
+        uint256 deployNonce = vm.getNonce(address(this));
+        address predictedYieldManager = addressFrom(address(this), deployNonce + 1);
+
+        // Deploy ChadVault with the predicted YieldManager address
+        vault = new ChadVault(dai, predictedYieldManager);
+
+        // Deploy DAIYieldManager using the actual Vault address
+        yielder = new DAIYieldManager(address(vault), address(dai), address(mockPool));
+
+        // Label contracts for debugging
+        vm.label(address(dai), "MockDAI");
+        vm.label(address(mockPool), "MockPool");
+        vm.label(address(vault), "ChadVault");
+        vm.label(address(yielder), "DAIYieldManager");
     }
 
-    // for ERC2612 tokens like DAI, we can just call depositWithpermit, instead of Approve and then deposit ! nice :) 
-    // its seems DAI has special ERC2612 allowance, DAI here is just for the name...
     function testDepositWithPermit() public {
         uint256 deadline = block.timestamp + 1 hours;
 
@@ -147,8 +167,4 @@ contract VaultTest is Test {
 
         vm.stopPrank();
     }
-
-
-
-
 }
