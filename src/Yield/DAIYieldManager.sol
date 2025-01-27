@@ -6,6 +6,8 @@ import {IPoolAddressesProvider} from "@aave/contracts/interfaces/IPoolAddressesP
 import {IPool} from "@aave/contracts/interfaces/IPool.sol";
 import {IYieldManager} from "../IYieldManager.sol";
 
+
+// @Dev Need to implement Yield managing...
 contract DAIYieldManager is IYieldManager {
 
     // State variables
