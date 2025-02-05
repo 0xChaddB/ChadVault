@@ -24,7 +24,7 @@ interface IStrategy {
    
    error InsufficientBalance(uint256 requested, uint256 available);
    error ExceedsLimit(uint256 amount, uint256 limit);
-   error StrategyDisabled();
+   error StrategyIsDisabled();
    error InvalidAmount();
    error ProtocolError(string reason);
    error Unauthorized(address caller);
@@ -122,8 +122,8 @@ interface IStrategy {
 
    /// @notice Get historical performance metrics
    /// @param timeframe Timeframe in seconds to look back
-   /// @return returns Returns in basis points
-   function getHistoricalReturns(uint256 timeframe) external view returns (int256 returns);
+   /// @return bps Returns in basis points
+   function getHistoricalReturns(uint256 timeframe) external view returns (uint256 bps);
 
    /*//////////////////////////////////////////////////////////////
                            SAFETY CHECKS
