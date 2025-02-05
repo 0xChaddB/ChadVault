@@ -31,7 +31,7 @@ interface IBaseVault {
     error SlippageExceeded(uint256 expected, uint256 received);
     error InvalidStrategy(address strategy);
     error InvalidFee(uint256 fee);
-    error Paused();
+    error VaultPaused();
     error Unauthorized(address caller);
     error StrategyFailed(bytes reason);
 
