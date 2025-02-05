@@ -8,9 +8,10 @@ interface IConfigurationManager {
                                 EVENTS
    //////////////////////////////////////////////////////////////*/
    
-   event DepositLimitUpdated(uint256 oldLimit, uint256 newLimit);
+   event MaxTotalDepositUpdated(uint256 oldLimit, uint256 newLimit);
    event WithdrawLimitUpdated(uint256 oldLimit, uint256 newLimit);
    event MinDepositUpdated(uint256 oldMin, uint256 newMin);
+   event MaxDepositUpdated(uint256 oldLimit, uint256 newLimit);
    event MaxTVLUpdated(uint256 oldMax, uint256 newMax);
    event TimelockUpdated(bytes32 paramType, uint256 oldTime, uint256 newTime);
    event FeeCapUpdated(bytes32 feeType, uint256 oldCap, uint256 newCap);
@@ -19,11 +20,18 @@ interface IConfigurationManager {
    event RiskLevelUpdated(address strategy, uint256 oldLevel, uint256 newLevel);
    event StrategyAdded(address strategy, uint256 weight, uint256 riskLevel);
    event StrategyRemoved(address strategy);
+
+    event ManagementFeeUpdated(uint256 oldFee, uint256 newFee);
+    event PerformanceFeeUpdated(uint256 oldFee, uint256 newFee);
+    event InvestmentLimitUpdated(uint256 oldLimit, uint256 newLimit);
+    event FeeCollectorUpdated(address oldCollector, address newCollector);
    
    /*//////////////////////////////////////////////////////////////
                                 ERRORS
    //////////////////////////////////////////////////////////////*/
-   
+
+   error InvalidFee(uint256 fee);
+   error InvalidAddress(address addr);
    error InvalidParameter(bytes32 param, uint256 value);
    error InvalidTimelock(uint256 timelock);
    error InvalidLimit(uint256 limit);
