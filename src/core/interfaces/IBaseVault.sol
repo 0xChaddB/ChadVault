@@ -11,29 +11,25 @@ interface IBaseVault {
     event StrategyUpdated(address indexed oldStrategy, address indexed newStrategy);
     event FeesUpdated(uint256 managementFee, uint256 performanceFee);
     event FeeReceiverUpdated(address indexed oldFeeReceiver, address indexed newFeeReceiver);
-    event Deposit(address indexed user, address indexed receiver, uint256 assets, uint256 shares);
-    event Withdraw(address indexed caller, address indexed receiver, address indexed owner, uint256 assets, uint256 shares);
     event YieldHarvested(uint256 yieldAmount, uint256 performanceFee);
     event EmergencyWithdraw(address indexed strategy, uint256 amount);
     event APYUpdated(uint256 newAPY);
-    event Paused(address indexed account);
-    event Unpaused(address indexed account);
     event SharePriceUpdated(uint256 oldPrice, uint256 newPrice);
 
     /*//////////////////////////////////////////////////////////////
                                  ERRORS
     //////////////////////////////////////////////////////////////*/
 
-    error InvalidAmount(uint256 amount);
-    error InvalidAddress(address addr);
-    error ExceedsLimit(uint256 amount, uint256 limit);
-    error InsufficientBalance(uint256 requested, uint256 available);
-    error SlippageExceeded(uint256 expected, uint256 received);
-    error InvalidStrategy(address strategy);
-    error InvalidFee(uint256 fee);
-    error VaultPaused();
-    error Unauthorized(address caller);
-    error StrategyFailed(bytes reason);
+    error BaseVault__InvalidAmount(uint256 amount);
+    error BaseVault__InvalidAddress(address addr);
+    error BaseVault__ExceedsLimit(uint256 amount, uint256 limit);
+    error BaseVault__InsufficientBalance(uint256 requested, uint256 available);
+    error BaseVault__SlippageExceeded(uint256 expected, uint256 received);
+    error BaseVault__InvalidStrategy(address strategy);
+    error BaseVault__InvalidFee(uint256 fee);
+    error BaseVault__Paused();
+    error BaseVault__Unauthorized(address caller);
+    error BaseVault__StrategyFailed(bytes reason);
 
     /*//////////////////////////////////////////////////////////////
                             CORE FUNCTIONS
