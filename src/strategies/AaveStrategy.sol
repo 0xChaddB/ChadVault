@@ -79,4 +79,13 @@ contract AaveStrategy is Ownable, ReentrancyGuard, IStrategy {
         emit StrategyEnabled(address(this));
     }
 
+    /*//////////////////////////////////////////////////////////////
+                          INVESTMENT FUNCTIONS
+    //////////////////////////////////////////////////////////////*/
+
+    function invest(uint256 amount) external override onlyVault whenActive nonReentrant returns (uint256 invested) {
+        if (amount == 0) revert InvalidAmount();
+        if (amount > investmentLimit - totalInvested) revert ExceedsLimit(amount, investmentLimit - totalInvested);
+    }
+
 }
