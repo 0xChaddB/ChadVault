@@ -28,4 +28,27 @@ contract AaveStrategy is Ownable, ReentrancyGuard, IStrategy {
     uint256 public lastHarvestAmount;
     uint256 public lastHarvestTimestamp;
 
+    /*//////////////////////////////////////////////////////////////
+                                CONSTRUCTOR
+    //////////////////////////////////////////////////////////////*/
+
+    constructor (
+        address _vault,
+        address _dai,
+        address _aaveProvider
+    ) Ownable(msg.sender) {
+        if (_vault == address(0)) revert InvalidAddress(_vault);
+        if (_dai == address(0)) revert InvalidAddress(_dai);
+        if (_aaveProvider == address(0)) revert InvalidAddress(_aaveProvider);
+            
+        vault = _vault;
+        dai = _dai;
+
+        // Initialize Aave Pool
+        IPoolAddressesProvider provider = IPoolAddressProvider(_aaveProvider);
+        aavePool = IPool(provider.getPool());
+        // get aToken for dai
+        aToken = aavePool.getReserveData(dai).aTokenAddress;
+    }
+
 }
