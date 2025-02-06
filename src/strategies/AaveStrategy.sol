@@ -60,4 +60,23 @@ contract AaveStrategy is Ownable, ReentrancyGuard, IStrategy {
         _;
     }
 
+    modifier whenActive() {
+        if (!isActive) revert StrategyNotActive();
+        _;
+    }
+
+    /*//////////////////////////////////////////////////////////////
+                          INITIALIZATION
+    //////////////////////////////////////////////////////////////*/
+
+    function initialize(bytes memory params) external override onlyOwner {
+        if (isActive) revert ("Already initialied");
+        
+        investmentLimit = 1_000_000e18;
+        isActive = true;
+        lastHarvestTimestamp = block.timestamp;
+
+        emit StrategyEnabled(address(this));
+    }
+
 }
