@@ -86,6 +86,30 @@ contract AaveStrategy is Ownable, ReentrancyGuard, IStrategy {
     function invest(uint256 amount) external override onlyVault whenActive nonReentrant returns (uint256 invested) {
         if (amount == 0) revert InvalidAmount();
         if (amount > investmentLimit - totalInvested) revert ExceedsLimit(amount, investmentLimit - totalInvested);
+
+        // Track invested amount before investing
+        uint256 beforeBalance = IERC20(aToken).balanceOf(address(this));
+
+        // Instead of transferring to strategy first, supply directly from vault to Aave
+        // The vault should already approved Aave to spend its DAI (not the case in BaseVault)
+        try aavePool.supply(dai, amount, address(this), 0) {
+            // If the supply operation succeeds, this code runs
+            // wecan safely check our new balance and update our state
+            uint256 afterBalance = IERC20(aToken).balanceOf(address(this));
+            invested = afterBalance - beforeBalance;
+            totalInvested += invested;
+            emit Invested(invested);
+            return invested;
+        } catch (bytes memory reason) {
+            // If the supply operation fails, this code runs
+            // We can capture the failure reason and handle it gracefully
+            revert ProtocolError(string(reason));
+        }
+    }
+
+    function redeem(uint256 amount) external override onlyVault whenActive nonReentrant returns (uint256 redeemed) {
+        if (amount == 0) revert InvalidAmount();
+        if (amount > totalInvested) revert ExceedsLimit(amount, totalInvested);
     }
 
 }
