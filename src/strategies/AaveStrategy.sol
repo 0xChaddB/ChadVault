@@ -82,14 +82,22 @@ contract AaveStrategy is Ownable, ReentrancyGuard, IStrategy {
     /*//////////////////////////////////////////////////////////////
                           INVESTMENT FUNCTIONS
     //////////////////////////////////////////////////////////////*/
+     
+    
+    //      Aave will send the aTokens to the Strategy contract or to the vault ?     
+    //     How should i do it ? aTokens in the vault, or in the strategy?
+    // What is best????
+
+
 
     function invest(uint256 amount) external override onlyVault whenActive nonReentrant returns (uint256 invested) {
         if (amount == 0) revert InvalidAmount();
         if (amount > investmentLimit - totalInvested) revert ExceedsLimit(amount, investmentLimit - totalInvested);
 
         // Track invested amount before investing
+        // track dai too?
         uint256 beforeBalance = IERC20(aToken).balanceOf(address(this));
-
+        
         // Instead of transferring to strategy first, supply directly from vault to Aave
         // The vault should already approved Aave to spend its DAI (not the case in BaseVault)
         try aavePool.supply(dai, amount, address(this), 0) {
@@ -110,6 +118,15 @@ contract AaveStrategy is Ownable, ReentrancyGuard, IStrategy {
     function redeem(uint256 amount) external override onlyVault whenActive nonReentrant returns (uint256 redeemed) {
         if (amount == 0) revert InvalidAmount();
         if (amount > totalInvested) revert ExceedsLimit(amount, totalInvested);
+
+        // Track balances before withdrawal
+        uint256 aTokenBefore = IERC20(aToken).balanceOf(address(this));
+        uint256 daiBefore = IERC20(dai).balanceOf(vault);
+
+        try aavePool.withdraw(dai, amount, vault) returns (uint256 acutalWithdrawn) {
+            uint256 aTokenAfter = IERC20(aToken).balanceOf(address(this));
+            
+
     }
 
 }
