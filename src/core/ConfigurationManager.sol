@@ -253,19 +253,19 @@ contract ConfigurationManager is IConfigurationManager, Initializable, Ownable, 
         return strategyConfig.strategyRiskLevels[strategy];
     }
 
-    function getMaxRiskLevel() external view override returns (uint256) {
+    function getMaxRiskLevel() external pure override returns (uint256) {
         return MAX_RISK_LEVEL;
     }
 
-    function getMinimumFeeDistributionRatio() external view override returns (uint256) {
+    function getMinimumFeeDistributionRatio() external pure override returns (uint256) {
         return MIN_FEE_DISTRIBUTION;
     }
 
-    function getMaximumFeeDistributionRatio() external view override returns (uint256) {
+    function getMaximumFeeDistributionRatio() external pure override returns (uint256) {
         return MAX_FEE_DISTRIBUTION;
     }
 
-    function getMinimumRebalanceThreshold() external view override returns (uint256) {
+    function getMinimumRebalanceThreshold() external pure override returns (uint256) {
         return MIN_REBALANCE_THRESHOLD;
     }
 
