@@ -85,14 +85,6 @@ interface IBaseVault {
     /// @notice Get total assets held by vault
     function totalAssets() external view returns (uint256);
 
-    /// @notice Convert an amount of assets to shares
-    /// @param assets Amount of assets to convert
-    function convertToShares(uint256 assets) external view returns (uint256);
-
-    /// @notice Convert an amount of shares to assets
-    /// @param shares Amount of shares to convert
-    function convertToAssets(uint256 shares) external view returns (uint256);
-
     /// @notice Maximum deposit possible for an address
     /// @param receiver Address that would receive shares
     function maxDeposit(address receiver) external view returns (uint256);
@@ -100,14 +92,6 @@ interface IBaseVault {
     /// @notice Maximum withdrawal possible for an address
     /// @param owner Address that owns the shares
     function maxWithdraw(address owner) external view returns (uint256);
-
-    /// @notice Preview deposit outcome
-    /// @param assets Amount of assets to simulate depositing
-    function previewDeposit(uint256 assets) external view returns (uint256);
-
-    /// @notice Preview withdrawal outcome
-    /// @param assets Amount of assets to simulate withdrawing
-    function previewWithdraw(uint256 assets) external view returns (uint256);
 
     /*//////////////////////////////////////////////////////////////
                         MANAGEMENT FUNCTIONS
