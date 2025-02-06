@@ -11,6 +11,21 @@ import {IStrategy} from "./interfaces/IStrategy.sol";
 
 contract AaveStrategy is Ownable, ReentrancyGuard, IStrategy {
 
+    /*//////////////////////////////////////////////////////////////
+                            STATE VARIABLES
+    //////////////////////////////////////////////////////////////*/
 
+    // Core addresses
+    address public vault;
+    address public dai;
+    IPool public  aavePool;
+    address public aToken;
+
+    // Strategy states
+    bool public isActive;
+    uint256 public investmentLimit;
+    uint256 public totalInvested;
+    uint256 public lastHarvestAmount;
+    uint256 public lastHarvestTimestamp;
 
 }
