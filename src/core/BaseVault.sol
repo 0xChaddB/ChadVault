@@ -16,14 +16,15 @@ import {IConfigurationManager} from "./interfaces/IConfigurationManager.sol";
 import {IStrategy} from "../strategies/interfaces/IStrategy.sol";
 
 contract BaseVault is 
-   IBaseVault, 
-   ERC4626, 
-   Initializable, 
-   ReentrancyGuard, 
-   Ownable, 
-   Pausable
-{
-    using SafeERC20 for ERC20;
+    IBaseVault,
+    ERC4626, 
+    Initializable,  
+    ReentrancyGuard, 
+    Ownable, 
+    Pausable
+    {
+    // im i doing this wrong? i get compile error when using safeApprove, safeTransfer....
+    using SafeERC20 for IERC20;
 
     /*//////////////////////////////////////////////////////////////
                             STATE VARIABLES
@@ -182,7 +183,7 @@ contract BaseVault is
         uint256 fee = (yieldAmount * performanceFee) / MAX_BPS;
         
         if (fee > 0) {
-            IERC20(asset()).safeTransfer(feeReceiver, fee);
+            IERC20(asset()).transfer(feeReceiver, fee);
         }
 
         lastHarvestTimestamp = block.timestamp;
@@ -268,7 +269,7 @@ contract BaseVault is
 
         uint256 idle = _idleAssets();
         if (idle > 0) {
-            IERC20(asset()).safeApprove(address(strategy), idle);
+            IERC20(asset()).approve(address(strategy), idle);
             strategy.invest(idle);
         }
     }
@@ -283,9 +284,9 @@ contract BaseVault is
     }
 
     /// @dev Hook that is called before any deposit/mint.
-    function _beforeTokenTransfer(address from, address to, uint256) internal {
+    function _beforeTokenTransfer(address from) internal view {
         if (from == address(0)) { // mint
-            if (paused()) revert BaseVault__VaultPaused();
+            if (paused()) revert BaseVault__Paused();
         }
     }
 
