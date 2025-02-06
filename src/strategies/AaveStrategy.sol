@@ -86,10 +86,10 @@ contract AaveStrategy is Ownable, ReentrancyGuard, IStrategy {
     
     //      Aave will send the aTokens to the Strategy contract or to the vault ?     
     //     How should i do it ? aTokens in the vault, or in the strategy?
-    // What is best????
+    //      What is best????
 
 
-
+    /** 
     function invest(uint256 amount) external override onlyVault whenActive nonReentrant returns (uint256 invested) {
         if (amount == 0) revert InvalidAmount();
         if (amount > investmentLimit - totalInvested) revert ExceedsLimit(amount, investmentLimit - totalInvested);
@@ -128,5 +128,5 @@ contract AaveStrategy is Ownable, ReentrancyGuard, IStrategy {
             
 
     }
-
+    */
 }
