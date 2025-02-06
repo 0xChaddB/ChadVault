@@ -51,4 +51,13 @@ contract AaveStrategy is Ownable, ReentrancyGuard, IStrategy {
         aToken = aavePool.getReserveData(dai).aTokenAddress;
     }
 
+    /*//////////////////////////////////////////////////////////////
+                            MODIFIERS
+    //////////////////////////////////////////////////////////////*/
+
+    modifier onlyVault() {
+        if (msg.sender != vault) revert Unauthorized(msg.sender);
+        _;
+    }
+
 }
