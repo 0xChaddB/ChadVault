@@ -84,11 +84,12 @@ contract AaveStrategy is Ownable, ReentrancyGuard, IStrategy {
     //////////////////////////////////////////////////////////////*/
      
     
-    //      Aave will send the aTokens to the Strategy contract or to the vault ?     
-    //     How should i do it ? aTokens in the vault, or in the strategy?
-    //      What is best????
-
-
+    /** 
+     * @notice Invests DAI from the vault into Aave lending pool
+     * @dev DAI moves directly from vault to Aave, but aTokens are held by strategy
+     * @param amount The amount of DAI to invest
+     * @return invested The amount of aTokens received
+     */
     function invest(uint256 amount) external override onlyVault whenActive nonReentrant returns (uint256 invested) {
         // Input validation
         if (amount == 0) revert InvalidAmount();
@@ -119,6 +120,12 @@ contract AaveStrategy is Ownable, ReentrancyGuard, IStrategy {
         }
     }
 
+    /**
+     * @notice Withdraws DAI from Aave and sends it back to the vault
+     * @dev Burns aTokens held by strategy to receive DAI in the vault
+     * @param amount The amount of DAI to withdraw
+     * @return withdrawn The actual amount of DAI withdrawn to the vault
+     */
     function withdraw(uint256 amount) external override onlyVault whenActive nonReentrant returns (uint256 withdrawn) {
         // Input validation
         if (amount == 0) revert InvalidAmount();
