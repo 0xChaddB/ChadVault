@@ -89,44 +89,64 @@ contract AaveStrategy is Ownable, ReentrancyGuard, IStrategy {
     //      What is best????
 
 
-    /** 
     function invest(uint256 amount) external override onlyVault whenActive nonReentrant returns (uint256 invested) {
+        // Input validation
         if (amount == 0) revert InvalidAmount();
         if (amount > investmentLimit - totalInvested) revert ExceedsLimit(amount, investmentLimit - totalInvested);
 
-        // Track invested amount before investing
-        // track dai too?
-        uint256 beforeBalance = IERC20(aToken).balanceOf(address(this));
-        
-        // Instead of transferring to strategy first, supply directly from vault to Aave
-        // The vault should already approved Aave to spend its DAI (not the case in BaseVault)
+        // Track both balances before investing
+        uint256 aTokenBefore = IERC20(aToken).balanceOf(address(this));
+        uint256 daiBefore = IERC20(dai).balanceOf(vault);
+
+        // Supply DAI to Aave (DAI from vault, aTokens to strategy)
         try aavePool.supply(dai, amount, address(this), 0) {
-            // If the supply operation succeeds, this code runs
-            // wecan safely check our new balance and update our state
-            uint256 afterBalance = IERC20(aToken).balanceOf(address(this));
-            invested = afterBalance - beforeBalance;
+            // Verify balances after operation
+            uint256 aTokenAfter = IERC20(aToken).balanceOf(address(this));
+            uint256 daiAfter = IERC20(dai).balanceOf(vault);
+
+            // Calculate actual amounts
+            invested = aTokenAfter - aTokenBefore;
+            uint256 daiSpent = daiBefore - daiAfter;
+
+            // Verify correct amounts
+            if (daiSpent != amount) revert("Incorrect DAI amount spent");
+            
             totalInvested += invested;
             emit Invested(invested);
             return invested;
         } catch (bytes memory reason) {
-            // If the supply operation fails, this code runs
-            // We can capture the failure reason and handle it gracefully
             revert ProtocolError(string(reason));
         }
     }
 
-    function redeem(uint256 amount) external override onlyVault whenActive nonReentrant returns (uint256 redeemed) {
+    function withdraw(uint256 amount) external override onlyVault whenActive nonReentrant returns (uint256 withdrawn) {
+        // Input validation
         if (amount == 0) revert InvalidAmount();
-        if (amount > totalInvested) revert ExceedsLimit(amount, totalInvested);
+        if (amount > totalInvested) revert InsufficientBalance(amount, totalInvested);
 
-        // Track balances before withdrawal
+        // Track both balances before withdrawal
         uint256 aTokenBefore = IERC20(aToken).balanceOf(address(this));
         uint256 daiBefore = IERC20(dai).balanceOf(vault);
 
-        try aavePool.withdraw(dai, amount, vault) returns (uint256 acutalWithdrawn) {
+        // Withdraw from Aave to vault
+        try aavePool.withdraw(dai, amount, vault) returns (uint256 actualWithdrawn) {
+            // Verify balances after operation
             uint256 aTokenAfter = IERC20(aToken).balanceOf(address(this));
-            
+            uint256 daiAfter = IERC20(dai).balanceOf(vault);
 
+            // Calculate actual amounts
+            uint256 aTokensBurned = aTokenBefore - aTokenAfter;
+            withdrawn = daiAfter - daiBefore;
+
+            // Verify we received expected amount
+            if (withdrawn < amount) revert SlippageExceeded(amount, withdrawn);
+
+            totalInvested -= aTokensBurned;
+            emit Withdrawn(withdrawn);
+            return withdrawn;
+        } catch (bytes memory reason) {
+            revert ProtocolError(string(reason));
+        }
     }
-    */
+    
 }
