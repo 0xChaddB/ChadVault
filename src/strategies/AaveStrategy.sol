@@ -82,7 +82,12 @@ contract AaveStrategy is Ownable, ReentrancyGuard, IStrategy {
     /*//////////////////////////////////////////////////////////////
                           INVESTMENT FUNCTIONS
     //////////////////////////////////////////////////////////////*/
-     
+    // Do we need additional safety checks in the next functions?
+    // eg: aave health check, 
+    // is slippage protection a thing here????? Rate change ?
+    // Balance change checks ?
+    // I do not check fot maximum invested amount...
+    // We will try with test cases
     
     /** 
      * @notice Invests DAI from the vault into Aave lending pool
@@ -91,7 +96,6 @@ contract AaveStrategy is Ownable, ReentrancyGuard, IStrategy {
      * @return invested The amount of aTokens received
      */
     function invest(uint256 amount) external override onlyVault whenActive nonReentrant returns (uint256 invested) {
-        // Input validation
         if (amount == 0) revert InvalidAmount();
         if (amount > investmentLimit - totalInvested) revert ExceedsLimit(amount, investmentLimit - totalInvested);
 
@@ -109,7 +113,7 @@ contract AaveStrategy is Ownable, ReentrancyGuard, IStrategy {
             invested = aTokenAfter - aTokenBefore;
             uint256 daiSpent = daiBefore - daiAfter;
 
-            // Verify correct amounts
+            // I think this check isnt enough
             if (daiSpent != amount) revert("Incorrect DAI amount spent");
             
             totalInvested += invested;
@@ -127,7 +131,6 @@ contract AaveStrategy is Ownable, ReentrancyGuard, IStrategy {
      * @return withdrawn The actual amount of DAI withdrawn to the vault
      */
     function withdraw(uint256 amount) external override onlyVault whenActive nonReentrant returns (uint256 withdrawn) {
-        // Input validation
         if (amount == 0) revert InvalidAmount();
         if (amount > totalInvested) revert InsufficientBalance(amount, totalInvested);
 
@@ -145,7 +148,7 @@ contract AaveStrategy is Ownable, ReentrancyGuard, IStrategy {
             uint256 aTokensBurned = aTokenBefore - aTokenAfter;
             withdrawn = daiAfter - daiBefore;
 
-            // Verify we received expected amount
+            // I think this check only isnt enough
             if (withdrawn < amount) revert SlippageExceeded(amount, withdrawn);
 
             totalInvested -= aTokensBurned;
