@@ -81,13 +81,14 @@ contract AaveStrategy is Ownable, ReentrancyGuard, IStrategy {
 
     /*//////////////////////////////////////////////////////////////
                           INVESTMENT FUNCTIONS
-    //////////////////////////////////////////////////////////////*/
+    //////////////////////////////////////////////////////////////
+
     // Do we need additional safety checks in the next functions?
     // eg: aave health check, 
     // is slippage protection a thing here????? Rate change ?
     // Balance change checks ?
     // I do not check fot maximum invested amount...
-    // We will try with test cases
+    // We will try thoses issues with test cases
     
     /** 
      * @notice Invests DAI from the vault into Aave lending pool
@@ -154,6 +155,47 @@ contract AaveStrategy is Ownable, ReentrancyGuard, IStrategy {
             totalInvested -= aTokensBurned;
             emit Withdrawn(withdrawn);
             return withdrawn;
+        } catch (bytes memory reason) {
+            revert ProtocolError(string(reason));
+        }
+    }
+    
+    /*//////////////////////////////////////////////////////////////
+                          HARVESTING FUNCTION
+    //////////////////////////////////////////////////////////////
+
+    // When and who calls the harvesting yield functions?
+    // Periodically? From the vault?
+
+    /**
+     * @notice Harvests yield earned from Aave lending
+     * @dev Calculates yield by comparing current aToken balance with tracked deposits/withdrawals
+     * @return yieldAmount The amount of yield harvested
+     * @custom:security Non-reentrant function with balance tracking
+     * @custom:security Only vault can trigger harvest
+     */
+    function harvestYield() external override onlyVault whenActive nonReentrant returns (uint256 yieldAmount) {
+      
+        uint256 currentBalance = IERC20(aToken).balanceOf(address(this));
+        uint256 expectedBalance = totalInvested;  // Our tracked position
+        
+        // @dev : wait... this is not good ???
+        if (currentBalance <= expectedBalance) revert("No yield to harvest");
+        
+        // Calculate yield
+        yieldAmount = currentBalance - expectedBalance;
+        
+        // Withdraw yield to vault
+        try aavePool.withdraw(dai, yieldAmount, vault) returns (uint256 actualWithdrawn) {
+            // Verify the withdrawal
+            if (actualWithdrawn < yieldAmount) revert SlippageExceeded(yieldAmount, actualWithdrawn);
+            
+            // Update last harvest info
+            lastHarvestAmount = actualWithdrawn;
+            lastHarvestTimestamp = block.timestamp;
+            
+            emit YieldHarvested(actualWithdrawn, block.timestamp);
+            return actualWithdrawn;
         } catch (bytes memory reason) {
             revert ProtocolError(string(reason));
         }
